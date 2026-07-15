@@ -213,6 +213,9 @@ PlayerSettings:
   - {fileID: 0}
   - {fileID: 0}
   - {fileID: 0}
+  - {fileID: 11400000, guid: 60823fc2d09363c499f0789c10922e47, type: 2}
+  - {fileID: 7923538589409489242, guid: 45b89a8293ac8924f9882b08a9098613, type: 2}
+  - {fileID: -7405519100350010473, guid: dc9fed8969f7fbf47b9c8e96ebb341c1, type: 2}
   metroInputSource: 0
   wsaTransparentSwapchain: 0
   m_HolographicPauseOnTrackingLoss: 0
@@ -935,7 +938,7 @@ PlayerSettings:
   allowUnsafeCode: 0
   useDeterministicCompilation: 1
   enableRoslynAnalyzers: 1
-  selectedPlatform: 3
+  selectedPlatform: 2
   additionalIl2CppArgs: 
   scriptingRuntimeVersion: 1
   gcIncremental: 0
@@ -948,9 +951,9 @@ PlayerSettings:
   metroPackageVersion: 1.0.0.0
   metroCertificatePath: Assets/WSATestCertificate.pfx
   metroCertificatePassword: 
-  metroCertificateSubject: TUM-CAMPAR
-  metroCertificateIssuer: TUM-CAMPAR
-  metroCertificateNotAfter: 80de154c28f0d901
+  metroCertificateSubject: JHU_TUM_LCSR
+  metroCertificateIssuer: JHU_TUM_LCSR
+  metroCertificateNotAfter: 801018a20633de01
   metroApplicationDescription: MSc - HipArthroscopy
   wsaImages:
     65636: 
@@ -996,7 +999,7 @@ PlayerSettings:
   metroSplashScreenUseBackgroundColor: 1
   platformCapabilities:
     WindowsStoreApps:
-      EnterpriseAuthentication: False
+      CodeGeneration: False
       OfflineMapsManagement: False
       HumanInterfaceDevice: False
       Location: False
@@ -1030,10 +1033,10 @@ PlayerSettings:
       PointOfService: False
       RecordedCallsFolder: False
       Contacts: False
-      InternetClient: True
-      CodeGeneration: False
-      BackgroundMediaPlayback: False
       Proximity: False
+      InternetClient: True
+      BackgroundMediaPlayback: False
+      EnterpriseAuthentication: False
   metroTargetDeviceFamilies:
     Desktop: False
     Holographic: True

@@ -1,4 +1,4 @@
-﻿using Microsoft.MixedReality.Toolkit;
+using Microsoft.MixedReality.Toolkit;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -38,15 +38,24 @@ namespace IRToolTrack
 
         public float[] sphere_positions
         {
-            get {
-                float[] coordinates = new float[sphere_count*3];
+            get
+            {
+                float[] coordinates = new float[sphere_count * 3];
                 int cur_coord = 0;
-                for (int i = 0; i< sphere_count; i++) {
-                    coordinates[cur_coord] = spheres[i].transform.localPosition.x;
-                    coordinates[cur_coord + 1] = spheres[i].transform.localPosition.y;
-                    coordinates[cur_coord + 2] = spheres[i].transform.localPosition.z;
+
+                for (int i = 0; i < sphere_count; i++)
+                {
+                    Vector3 localPos = transform.InverseTransformPoint(
+                        spheres[i].transform.position
+                    );
+
+                    coordinates[cur_coord] = localPos.x;
+                    coordinates[cur_coord + 1] = localPos.y;
+                    coordinates[cur_coord + 2] = localPos.z;
+
                     cur_coord += 3;
                 }
+
                 return coordinates;
             }
         }
@@ -85,6 +94,10 @@ namespace IRToolTrack
             Active
         }
         private Status _subStatus = Status.Inactive;
+        public bool StatusIsActive
+        {
+            get { return _subStatus == Status.Active; }
+        }
 
         public void StartTracking()
         {
@@ -114,9 +127,16 @@ namespace IRToolTrack
         {
             if (_subStatus == Status.Inactive)
                 return;
+            if (irToolTracking == null)
+            {
+                Debug.LogError($"IRToolController {identifier} could not find an IRToolTracking component.");
+                _subStatus = Status.Inactive;
+                return;
+            }
+
             Int64 trackingTimestamp = irToolTracking.GetTimestamp();
             float[] tool_transform = irToolTracking.GetToolTransform(identifier);
-            if (tool_transform != null && tool_transform[0]!= float.NaN && tool_transform[7]!=0 && lastUpdate<trackingTimestamp)
+            if (IsValidToolTransform(tool_transform) && lastUpdate<trackingTimestamp)
             {
                 if (!childrenActive)
                 {
@@ -135,6 +155,8 @@ namespace IRToolTrack
                 targetRotation = q;
                 targetPosition = new Vector3(tool_transform[0], tool_transform[1], tool_transform[2]);
                 lastSpotted = Time.time;
+                transform.position = targetPosition;
+                transform.rotation = targetRotation;
             }
             else if (childrenActive && disableWhenTrackingLost && Time.time-lastSpotted>secondsLostUntilDisable)
             {
@@ -159,9 +181,34 @@ namespace IRToolTrack
                 //transform.rotation = Quaternion.Lerp(targetRotation, transform.rotation, 0.5f);
             }
             */
-            transform.position = targetPosition;
-            transform.rotation = targetRotation;
             lastUpdate = trackingTimestamp;
+        }
+
+        private static bool IsValidToolTransform(float[] toolTransform)
+        {
+            if (toolTransform == null || toolTransform.Length < 8 || toolTransform[7] == 0)
+            {
+                return false;
+            }
+
+            for (int i = 0; i < 7; i++)
+            {
+                if (!IsFinite(toolTransform[i]))
+                {
+                    return false;
+                }
+            }
+
+            float quaternionMagnitude = toolTransform[3] * toolTransform[3]
+                + toolTransform[4] * toolTransform[4]
+                + toolTransform[5] * toolTransform[5]
+                + toolTransform[6] * toolTransform[6];
+            return quaternionMagnitude > 0.0001f;
+        }
+
+        private static bool IsFinite(float value)
+        {
+            return !float.IsNaN(value) && !float.IsInfinity(value);
         }
     }
 }
