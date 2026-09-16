@@ -41,6 +41,11 @@ public class RayCollectionManager : MonoBehaviour
     private readonly List<List<GameObject>> displayedLines =
         new List<List<GameObject>>();
 
+    // Time.realtimeSinceStartup when each point's first ray was captured;
+    // -1 means the point has not been started yet. Not sent to Windows.
+    private readonly float[] pointStartRealtime =
+        new float[PointCount];
+
     private Transform rayContainer;
     private Material lineMaterial;
 
@@ -126,6 +131,8 @@ public class RayCollectionManager : MonoBehaviour
                 });
 
             displayedLines.Add(new List<GameObject>());
+
+            pointStartRealtime[pointIndex] = -1.0f;
         }
 
         currentPointIndex = 0;
@@ -201,6 +208,12 @@ public class RayCollectionManager : MonoBehaviour
             pointB = pointB
         };
 
+        if (currentPoint.rays.Count == 0)
+        {
+            pointStartRealtime[currentPointIndex] =
+                Time.realtimeSinceStartup;
+        }
+
         currentPoint.rays.Add(newRay);
 
         GameObject lineObject = CreateRayLine(
@@ -217,6 +230,11 @@ public class RayCollectionManager : MonoBehaviour
 
         if (currentRayNumber == RaysPerPoint)
         {
+            currentPoint.measurementDurationMs =
+                (Time.realtimeSinceStartup -
+                 pointStartRealtime[currentPointIndex]) *
+                1000.0f;
+
             if (currentPointIndex == PointCount - 1)
             {
                 statusMessage =
@@ -371,6 +389,15 @@ public class RayCollectionManager : MonoBehaviour
         point.rays.RemoveAt(
             point.rays.Count - 1);
 
+        // The point is no longer complete, so its measured duration is
+        // stale; it will be recomputed when the point reaches 4 rays again.
+        point.measurementDurationMs = 0.0f;
+
+        if (point.rays.Count == 0)
+        {
+            pointStartRealtime[pointIndex] = -1.0f;
+        }
+
         List<GameObject> lines =
             displayedLines[pointIndex];
 
@@ -441,6 +468,8 @@ public class RayCollectionManager : MonoBehaviour
         {
             // Remove stored ray data.
             session.groups[pointIndex].rays.Clear();
+            session.groups[pointIndex].measurementDurationMs = 0.0f;
+            pointStartRealtime[pointIndex] = -1.0f;
 
             // Remove displayed ray lines.
             List<GameObject> lines =
@@ -961,7 +990,6 @@ public class RayCollectionManager : MonoBehaviour
 
 // =============================================================
 // Data sent to Windows
-// No timestamps
 // No fitting calculations
 // =============================================================
 
@@ -992,6 +1020,10 @@ public class PointGroup
 {
     public int pointIndex;
     public List<RayData> rays;
+
+    // Milliseconds from capturing this point's first ray to its fourth
+    // (i.e. this point being fully measured). 0 while incomplete.
+    public float measurementDurationMs;
 }
 
 [Serializable]

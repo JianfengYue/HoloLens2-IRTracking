@@ -28,16 +28,15 @@ public class ParentTransparencyController : MonoBehaviour
 
     private void Update()
     {
-    if (Input.GetKeyDown(KeyCode.DownArrow))
-    {
-        ChangeAlpha(-alphaStep);
-    }
+        if (Input.GetKeyDown(KeyCode.N))
+        {
+            ChangeAlpha(-alphaStep);
+        }
 
-    // Up Arrow: 0% -> 25% -> 50% -> 75% -> 100%
-    if (Input.GetKeyDown(KeyCode.UpArrow))
-    {
-        ChangeAlpha(alphaStep);
-    }
+        if (Input.GetKeyDown(KeyCode.M))
+        {
+            ChangeAlpha(alphaStep);
+        }
     }
 
     private void CollectMaterials()
